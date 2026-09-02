@@ -34,7 +34,7 @@ class _CookScreenState extends State<CookScreen> {
     'Dark Chocolate',
   ];
 
-  static const String _geminiApiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'AIzaSyDemoKeyFallback');
+  static const String _geminiApiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
   List<Recipe> _generatedDishes = [];
   bool _isLoading = false;
