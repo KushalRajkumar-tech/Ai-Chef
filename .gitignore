@@ -1,0 +1,27 @@
+# Flutter / Dart Build Artifacts
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/pubspec.lock
+
+# Node / Web
+**/node_modules/
+**/dist/
+config.js
+site/public/config.js
+*.env
+.env*
+
+# IDE & OS Files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.idea/
+.vscode/
+*.swp
+*.bak

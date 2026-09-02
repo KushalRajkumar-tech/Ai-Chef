@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AiChef - Ingredient Engine</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="config.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-container": "#ff6b00",
+                        "primary": "#ffb693",
+                        "on-primary": "#561f00",
+                        "background": "#0d0d11",
+                        "surface": "#131317",
+                        "surface-container": "#1f1f23",
+                        "surface-container-high": "#2a292e",
+                        "surface-dim": "#131317",
+                        "on-surface": "#e4e1e7",
+                        "on-surface-variant": "#e2bfb0",
+                        "secondary": "#c7c4d8",
+                        "on-secondary-container": "#b5b3c6",
+                        "outline": "#a98a7d",
+                        "outline-variant": "#5a4136",
+                        "glass-bg": "rgba(28, 28, 42, 0.75)"
+                    },
+                    fontFamily: {
+                        "headline": ["Montserrat", "sans-serif"],
+                        "body": ["Hanken Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "card": "18px",
+                        "btn": "14px"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0D0D11;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(255, 107, 0, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 90%, rgba(255, 107, 0, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Hanken Grotesk', sans-serif;
+            color: #E4E1E7;
+        }
+        
+        /* Direct Explicit Fix for Input Bar */
+        #ingredient-input {
+            color: #FFFFFF !important;
+            background-color: rgba(28, 28, 42, 0.95) !important;
+            caret-color: #FF6B00 !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+        }
+        #ingredient-input:focus {
+            border-color: #FF6B00 !important;
+            box-shadow: 0 0 12px rgba(255, 107, 0, 0.4) !important;
+            outline: none !important;
+        }
+        #ingredient-input::placeholder {
+            color: rgba(181, 179, 198, 0.7) !important;
+        }
+
+        .glass-panel {
+            background: rgba(28, 28, 42, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-panel-active {
+            background: rgba(255, 107, 0, 0.18);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 107, 0, 0.45);
+        }
+        .glow-button {
+            box-shadow: 0 0 22px rgba(255, 107, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .glow-button:hover, .glow-button:active {
+            box-shadow: 0 0 32px rgba(255, 107, 0, 0.65);
+            transform: translateY(-1px);
+        }
+        .card-hover {
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .card-hover:hover {
+            border-color: rgba(255, 107, 0, 0.4);
+            transform: translateY(-2px);
+        }
+        .card-hover:active {
+            transform: scale(0.98);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #ffdbcc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-image-overlay {
+            background: linear-gradient(to top, rgba(13, 13, 17, 0.95) 0%, rgba(13, 13, 17, 0.3) 50%, transparent 100%);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col items-center pb-28">
+
+    <!-- Mobile Frame Container -->
+    <div class="w-full max-w-[390px] relative min-h-screen flex flex-col">
+
+        <!-- Top App Bar with Smart Back -->
+        <header class="glass-panel sticky top-0 z-40 flex justify-between items-center px-4 h-16 border-b border-white/10 rounded-b-2xl">
+            <button aria-label="Go Back" class="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-on-secondary-container hover:text-white transition-colors" onclick="goBack()">
+                <span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
+            </button>
+            <h1 class="font-headline font-bold text-base text-white tracking-tight flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-primary-container text-lg" style="font-variation-settings: 'FILL' 1;">kitchen</span>
+                <span>Smart Ingredient Engine</span>
+            </h1>
+            <div class="w-9 h-9"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow px-4 pt-5 flex flex-col gap-6">
+
+            <!-- Hero Title -->
+            <section class="flex flex-col gap-1.5">
+                <div class="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-sm text-primary-container">tune</span>
+                    <span>AI Culinary Formulator</span>
+                </div>
+                <h2 class="font-headline text-2xl font-bold leading-tight text-gradient">
+                    What's in your kitchen?
+                </h2>
+                <p class="text-xs text-on-secondary-container leading-relaxed">
+                    Type or tap ingredients below. AI Chef will generate a customized gourmet recipe.
+                </p>
+            </section>
+
+            <!-- Fixed & Enhanced Ingredient Input Card -->
+            <section class="glass-panel rounded-card p-4 flex flex-col gap-3.5 border border-primary-container/30 shadow-lg shadow-black/40">
+                <div class="flex items-center justify-between">
+                    <label class="font-headline text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary-container text-sm">checklist</span>
+                        <span>My Selected Ingredients</span>
+                    </label>
+                    <span class="text-[11px] text-primary font-medium bg-primary-container/10 px-2 py-0.5 rounded-full border border-primary-container/20" id="ingredient-count">
+                        4 items ready
+                    </span>
+                </div>
+
+                <!-- Dynamic Tag Pills Container -->
+                <div class="flex flex-wrap gap-2 min-h-[60px] p-2.5 rounded-xl bg-[#0D0D11]/80 border border-white/10" id="tags-container">
+                    <span class="glass-panel-active px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5 shadow-sm">
+                        <span class="tag-label">Chicken Thighs</span>
+                        <button class="hover:text-primary-container transition-colors text-sm font-bold text-on-secondary-container" onclick="this.parentElement.remove(); updateCount();">×</button>
+                    </span>
+                    <span class="glass-panel-active px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5 shadow-sm">
+                        <span class="tag-label">Butter</span>
+                        <button class="hover:text-primary-container transition-colors text-sm font-bold text-on-secondary-container" onclick="this.parentElement.remove(); updateCount();">×</button>
+                    </span>
+                    <span class="glass-panel-active px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5 shadow-sm">
+                        <span class="tag-label">Fresh Garlic</span>
+                        <button class="hover:text-primary-container transition-colors text-sm font-bold text-on-secondary-container" onclick="this.parentElement.remove(); updateCount();">×</button>
+                    </span>
+                    <span class="glass-panel-active px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5 shadow-sm">
+                        <span class="tag-label">Heavy Cream</span>
+                        <button class="hover:text-primary-container transition-colors text-sm font-bold text-on-secondary-container" onclick="this.parentElement.remove(); updateCount();">×</button>
+                    </span>
+                </div>
+
+                <!-- Fixed Input Bar with Clear White Text & Add Button -->
+                <div class="flex gap-2">
+                    <input class="flex-grow rounded-xl py-3 px-3.5 text-sm text-white placeholder:text-on-secondary-container/60 border border-white/20 focus:outline-none focus:border-primary-container transition-all" id="ingredient-input" placeholder="Type ingredient (e.g. Paneer, Salmon, Pasta)..." type="text"/>
+                    <button class="px-4 py-3 rounded-xl bg-primary-container text-white font-headline text-xs font-bold hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 glow-button flex-none" id="add-btn" onclick="addIngredient()">
+                        <span class="material-symbols-outlined text-sm font-bold">add</span>
+                        <span>Add</span>
+                    </button>
+                </div>
+
+                <!-- Quick-Add Pantry Chips -->
+                <div class="flex flex-col gap-2 pt-1">
+                    <span class="text-[11px] font-semibold text-on-secondary-container uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs text-primary-container">tips_and_updates</span>
+                        <span>Quick Add:</span>
+                    </span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button class="glass-panel px-2.5 py-1 rounded-full text-xs font-medium text-on-secondary-container hover:text-white hover:border-primary-container/40 active:scale-95 transition-all flex items-center gap-1" onclick="quickAdd('Fresh Paneer')">
+                            <span class="text-primary-container font-bold">+</span> Paneer
+                        </button>
+                        <button class="glass-panel px-2.5 py-1 rounded-full text-xs font-medium text-on-secondary-container hover:text-white hover:border-primary-container/40 active:scale-95 transition-all flex items-center gap-1" onclick="quickAdd('Salmon Fillet')">
+                            <span class="text-primary-container font-bold">+</span> Salmon
+                        </button>
+                        <button class="glass-panel px-2.5 py-1 rounded-full text-xs font-medium text-on-secondary-container hover:text-white hover:border-primary-container/40 active:scale-95 transition-all flex items-center gap-1" onclick="quickAdd('Wild Mushrooms')">
+                            <span class="text-primary-container font-bold">+</span> Mushrooms
+                        </button>
+                        <button class="glass-panel px-2.5 py-1 rounded-full text-xs font-medium text-on-secondary-container hover:text-white hover:border-primary-container/40 active:scale-95 transition-all flex items-center gap-1" onclick="quickAdd('Wagyu Steak')">
+                            <span class="text-primary-container font-bold">+</span> Wagyu
+                        </button>
+                        <button class="glass-panel px-2.5 py-1 rounded-full text-xs font-medium text-on-secondary-container hover:text-white hover:border-primary-container/40 active:scale-95 transition-all flex items-center gap-1" onclick="quickAdd('Basmati Rice')">
+                            <span class="text-primary-container font-bold">+</span> Basmati Rice
+                        </button>
+                        <button class="glass-panel px-2.5 py-1 rounded-full text-xs font-medium text-on-secondary-container hover:text-white hover:border-primary-container/40 active:scale-95 transition-all flex items-center gap-1" onclick="quickAdd('Dark Chocolate')">
+                            <span class="text-primary-container font-bold">+</span> Dark Chocolate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generate Recipe Primary CTA -->
+                <button class="w-full bg-gradient-to-r from-primary-container via-[#ff7a1a] to-primary-container text-white font-headline font-bold text-sm py-4 rounded-btn flex items-center justify-center gap-2 glow-button active:scale-[0.98] transition-transform shadow-xl shadow-primary-container/25 mt-1" onclick="generateRecipe()">
+                    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                    <span>Generate AI Recipe</span>
+                </button>
+            </section>
+
+            <!-- 1. Indian Food Category Rail -->
+            <section class="flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-headline font-bold text-base text-white flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary-container text-lg">dinner_dining</span>
+                        <span>Indian Food</span>
+                    </h3>
+                    <span class="text-xs text-primary font-medium">3 Dishes</span>
+                </div>
+
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-1 snap-x snap-mandatory">
+
+                    <!-- Indian 1 (Butter Chicken) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=butter-chicken">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Royal Butter Chicken" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&auto=format&fit=crop&q=80"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">4.9</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">35 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Medium</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Royal Butter Chicken
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                Creamy tomato, cashew &amp; fenugreek curry with tender tandoori chicken.
+                            </p>
+                        </div>
+                    </a>
+
+                    <!-- Indian 2 (Paneer Tikka Masala) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=paneer-tikka">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Smoky Paneer Tikka" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">4.8</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">30 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Easy</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Smoky Paneer Tikka Masala
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                Char-grilled cottage cheese and peppers tossed in spiced onion-tomato gravy.
+                            </p>
+                        </div>
+                    </a>
+
+                    <!-- Indian 3 (Dum Biryani) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=dum-biryani">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Hyderabadi Dum Biryani" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">5.0</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">50 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Hard</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Hyderabadi Dum Biryani
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                Fragrant aged basmati infused with saffron milk, ghee &amp; fried onions.
+                            </p>
+                        </div>
+                    </a>
+
+                </div>
+            </section>
+
+            <!-- 2. Chef's Favorites Category Rail -->
+            <section class="flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-headline font-bold text-base text-white flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary-container text-lg">auto_awesome</span>
+                        <span>Chef's Favorites</span>
+                    </h3>
+                    <span class="text-xs text-primary font-medium">3 Dishes</span>
+                </div>
+
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-1 snap-x snap-mandatory">
+
+                    <!-- Favorite 1 (Garlic Salmon) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=salmon">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Pan-Seared Garlic Salmon" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=80"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">4.9</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">25 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Easy</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Pan-Seared Garlic Salmon
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                Fresh Atlantic salmon with herb butter &amp; garlic glaze.
+                            </p>
+                        </div>
+                    </a>
+
+                    <!-- Favorite 2 (Truffle Pasta) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=truffle-pasta">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Truffle Mushroom Pasta" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="truffle_pasta.jpg"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">4.8</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">20 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Medium</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Truffle Tagliatelle Pasta
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                Creamy parmesan emulsion with wild mushrooms &amp; black truffle.
+                            </p>
+                        </div>
+                    </a>
+
+                    <!-- Favorite 3 (Wagyu Ribeye) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=wagyu">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Wagyu Ribeye" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">5.0</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">45 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Hard</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Wagyu Ribeye Steak
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                A5 grade wagyu steak with roasted asparagus &amp; herb butter.
+                            </p>
+                        </div>
+                    </a>
+
+                </div>
+            </section>
+
+            <!-- 3. Artisan Desserts Category Rail -->
+            <section class="flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-headline font-bold text-base text-white flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary-container text-lg">cake</span>
+                        <span>Artisan Desserts</span>
+                    </h3>
+                    <span class="text-xs text-primary font-medium">2 Dishes</span>
+                </div>
+
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-1 snap-x snap-mandatory">
+
+                    <!-- Dessert 1 (Lava Cake) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=lava-cake">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Molten Chocolate Lava Cake" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">4.9</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">25 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Medium</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Molten Chocolate Lava Cake
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                Dark chocolate soufflé cake with a flowing molten fudge core.
+                            </p>
+                        </div>
+                    </a>
+
+                    <!-- Dessert 2 (Carrot Halwa) -->
+                    <a class="snap-start flex-none w-[250px] glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" href="recipe.html?id=carrot-halwa">
+                        <div class="relative h-36 w-full overflow-hidden">
+                            <img alt="Royal Gajar Ka Halwa" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="gajar_ka_halwa.jpg"/>
+                            <div class="absolute inset-0 hero-image-overlay"></div>
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-primary-container text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-headline text-[10px] font-bold text-white">4.9</span>
+                            </div>
+
+                            <div class="absolute bottom-2 left-2.5 text-[11px] font-medium text-white/90 flex items-center gap-1.5">
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">35 min</span>
+                                <span class="bg-black/50 px-2 py-0.5 rounded-md border border-white/10">Easy</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex flex-col gap-1">
+                            <h4 class="font-headline font-semibold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                                Royal Gajar Ka Halwa
+                            </h4>
+                            <p class="text-[11px] text-on-secondary-container line-clamp-2 leading-relaxed">
+                                Grated red carrots slow simmered with milk, cardamom &amp; ghee.
+                            </p>
+                        </div>
+                    </a>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Sticky Frosted Bottom Navigation Bar -->
+        <nav class="bg-[#0D0D11]/90 backdrop-blur-xl border-t border-white/10 fixed bottom-0 left-0 right-0 w-full max-w-[390px] mx-auto z-50 flex justify-around items-center h-20 px-4 pb-3">
+            
+            <!-- Home Tab -->
+            <a class="flex flex-col items-center justify-center text-on-secondary-container hover:text-white font-headline font-medium text-[11px] w-16 active:scale-95 transition-transform" href="index.html">
+                <span class="material-symbols-outlined text-[24px] mb-0.5">home</span>
+                <span>Home</span>
+            </a>
+
+            <!-- Cook Tab (Active) -->
+            <a class="flex flex-col items-center justify-center text-primary-container font-headline font-bold text-[11px] w-16 relative active:scale-95 transition-transform" href="ingredients.html">
+                <div class="absolute -top-3 w-8 h-1 rounded-full bg-primary-container shadow-sm shadow-primary-container"></div>
+                <span class="material-symbols-outlined text-[24px] mb-0.5" style="font-variation-settings: 'FILL' 1;">kitchen</span>
+                <span>Cook</span>
+            </a>
+
+            <!-- Saved Tab -->
+            <a class="flex flex-col items-center justify-center text-on-secondary-container hover:text-white font-headline font-medium text-[11px] w-16 active:scale-95 transition-transform" href="saved.html">
+                <span class="material-symbols-outlined text-[24px] mb-0.5">bookmark</span>
+                <span>Saved</span>
+            </a>
+
+    <!-- AI Loading Overlay Modal -->
+    <div class="fixed inset-0 z-50 bg-[#0D0D11]/90 backdrop-blur-xl flex flex-col items-center justify-center px-6 hidden" id="ai-loading-modal">
+        <div class="glass-panel p-6 rounded-card w-full max-w-[340px] flex flex-col items-center text-center gap-4 border border-primary-container/40 shadow-2xl shadow-primary-container/20">
+            <!-- Pulsing Flame Icon -->
+            <div class="relative w-16 h-16 flex items-center justify-center">
+                <div class="absolute inset-0 bg-primary-container/20 rounded-full animate-ping"></div>
+                <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-primary-container to-[#ff9933] flex items-center justify-center shadow-lg shadow-primary-container/40">
+                    <span class="material-symbols-outlined text-white text-2xl animate-pulse" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-1.5">
+                <span class="text-[10px] font-bold tracking-widest uppercase text-primary text-gradient">Gemini AI Executive Chef</span>
+                <h3 class="font-headline font-bold text-lg text-white" id="loading-title">Formulating Bespoke Recipe...</h3>
+                <p class="text-xs text-on-secondary-container leading-relaxed" id="loading-subtext">
+                    Analyzing ingredients, balancing aromatic flavor profiles, and crafting precision Michelin instructions.
+                </p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-primary-container via-white to-primary-container h-full w-full animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast / Modal -->
+    <div class="fixed inset-0 z-50 bg-[#0D0D11]/80 backdrop-blur-md flex flex-col items-center justify-center px-6 hidden" id="ai-error-modal">
+        <div class="glass-panel p-5 rounded-card w-full max-w-[340px] flex flex-col items-center text-center gap-3 border border-red-500/40 shadow-xl">
+            <span class="material-symbols-outlined text-red-400 text-3xl">error</span>
+            <h3 class="font-headline font-bold text-base text-white">AI Generation Failed</h3>
+            <p class="text-xs text-on-secondary-container leading-relaxed" id="error-message">
+                Could not connect to Gemini API. Please check your internet connection or try again.
+            </p>
+            <button class="w-full mt-2 py-2.5 rounded-xl bg-primary-container text-white font-headline text-xs font-bold hover:opacity-90 active:scale-95 transition-all" onclick="document.getElementById('ai-error-modal').classList.add('hidden')">
+                Dismiss
+            </button>
+        </div>
+    </div>
+
+    <!-- Script for Dynamic Ingredient Adding & Gemini AI Recipe Generation -->
+    <script>
+        const GEMINI_API_KEY = window.GEMINI_API_KEY || localStorage.getItem('GEMINI_API_KEY') || 'AIzaSyDemoKeyFallback';
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function updateCount() {
+            const count = document.getElementById('tags-container').children.length;
+            document.getElementById('ingredient-count').innerText = `${count} item${count !== 1 ? 's' : ''} ready`;
+        }
+
+        function addIngredient() {
+            const input = document.getElementById('ingredient-input');
+            const val = input.value.trim();
+            if (!val) return;
+            createTag(val);
+            input.value = '';
+        }
+
+        function quickAdd(name) {
+            createTag(name);
+        }
+
+        function createTag(text) {
+            const container = document.getElementById('tags-container');
+            const span = document.createElement('span');
+            span.className = 'glass-panel-active px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5 shadow-sm';
+            span.innerHTML = `<span class="tag-label">${text}</span><button class="hover:text-primary-container transition-colors text-sm font-bold text-on-secondary-container" onclick="this.parentElement.remove(); updateCount();">×</button>`;
+            container.appendChild(span);
+            updateCount();
+             function getAccurateDishImage(dishName, category, ingredients) {
+            const text = ((dishName || '') + ' ' + (category || '') + ' ' + (ingredients || []).join(' ')).toLowerCase();
+            
+            // Indian & Tandoori Specialties
+            if (text.includes('paneer') || text.includes('tikka') || text.includes('cottage cheese')) {
+                return 'https://images.unsplash.com/photo-1567184109191-37764e7fadd9?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('butter chicken') || text.includes('makhani') || text.includes('tikka masala') || text.includes('chicken curry') || text.includes('korma')) {
+                return 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('biryani') || text.includes('pulao') || text.includes('fried rice') || text.includes('basmati')) {
+                return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('tandoori') || text.includes('kebab') || text.includes('seekh') || text.includes('roast chicken') || text.includes('grilled chicken')) {
+                return 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('dal') || text.includes('lentil') || text.includes('chana') || text.includes('curry') || text.includes('sambar')) {
+                return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('halwa') || text.includes('gajar') || text.includes('carrot halwa') || text.includes('gulab jamun') || text.includes('kheer')) {
+                return 'https://images.unsplash.com/photo-1579372786545-d24232daf58c?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Pastas & Italian
+            if (text.includes('pasta') || text.includes('tagliatelle') || text.includes('spaghetti') || text.includes('carbonara') || text.includes('fettuccine') || text.includes('penne') || text.includes('lasagna') || text.includes('alfredo') || text.includes('macaroni')) {
+                return 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('pizza') || text.includes('flatbread') || text.includes('focaccia') || text.includes('calzone')) {
+                return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('risotto') || text.includes('mushroom') || text.includes('truffle')) {
+                return 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Seafood & Meats
+            if (text.includes('salmon') || text.includes('fish') || text.includes('trout') || text.includes('cod') || text.includes('tuna') || text.includes('halibut')) {
+                return 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('prawn') || text.includes('shrimp') || text.includes('lobster') || text.includes('crab') || text.includes('calamari')) {
+                return 'https://images.unsplash.com/photo-1559742811-822873691df8?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('steak') || text.includes('beef') || text.includes('ribeye') || text.includes('tenderloin') || text.includes('lamb') || text.includes('mutton')) {
+                return 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('burger') || text.includes('sandwich') || text.includes('wrap') || text.includes('sub')) {
+                return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('taco') || text.includes('burrito') || text.includes('fajita') || text.includes('quesadilla') || text.includes('mexican')) {
+                return 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Asian Noodles & Stir Fries
+            if (text.includes('noodle') || text.includes('ramen') || text.includes('pad thai') || text.includes('chow mein') || text.includes('udon') || text.includes('soba') || text.includes('stir fry')) {
+                return 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('soup') || text.includes('broth') || text.includes('chowder') || text.includes('stew')) {
+                return 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('salad') || text.includes('bowl') || text.includes('avocado') || text.includes('quinoa') || text.includes('caesar')) {
+                return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('egg') || text.includes('omelet') || text.includes('shakshuka') || text.includes('scramble') || text.includes('breakfast')) {
+                return 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Desserts & Bakery
+            if (text.includes('chocolate') || text.includes('brownie') || text.includes('fudge') || text.includes('lava cake')) {
+                return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('cheesecake') || text.includes('tiramisu') || text.includes('pudding') || text.includes('pancake') || text.includes('waffle') || text.includes('dessert') || text.includes('ice cream')) {
+                return 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // High Quality Gourmet Food Fallback
+            return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80';
+        }
+
+        async function generateRecipe() {
+            const tags = Array.from(document.querySelectorAll('.tag-label')).map(el => el.innerText.trim()).filter(Boolean);
+            
+            if (tags.length === 0) {
+                showError("Please add at least 1 ingredient from your kitchen pantry first.");
+                return;
+            }
+
+            const modal = document.getElementById('ai-loading-modal');
+            modal.classList.remove('hidden');
+
+            const ingredientsList = tags.join(', ');
+            const prompt = `You are a talented, practical chef who creates delicious, authentic, and easy-to-follow recipes.
+Create a mouth-watering, realistic recipe based on the user's input ingredients/dish request: ${ingredientsList}.
+
+Rules:
+1. Dish Name: Keep the name simple, authentic, and natural (e.g. "Classic Restaurant-Style Paneer Tikka", "Creamy Garlic Butter Salmon", "Homestyle Butter Chicken", "Easy Truffle Mushroom Pasta"). DO NOT make it overly fancy, pretentious, or use obscure French/Michelin culinary jargon.
+2. Description: A short, appetizing 2-sentence summary explaining why it tastes great and what to expect.
+3. Visual Prompt: A detailed 1-sentence description for generating a realistic, mouth-watering gourmet food photo of this exact finished dish.
+4. Ingredients: Everyday practical ingredients with clear standard measurements (e.g. "250g Paneer, cubed", "2 tbsp Olive oil", "1 tsp Cumin powder").
+5. Steps: Simple, clear, numbered step-by-step instructions that anyone can easily cook at home.
+6. Stats: Realistic cook time (e.g. "25 min"), level ("Easy" or "Medium"), servings ("2-3 Servings"), and calories (e.g. "380 kcal").
+
+Return ONLY a single valid JSON object without markdown formatting, code fences, or extra text:
+{
+  "name": "Natural Delicious Dish Name",
+  "category": "Cuisine / Style Category",
+  "desc": "Short appetizing description.",
+  "visualPrompt": "Delicious appetizing restaurant food photo of [Dish Name] garnished with fresh herbs on a plate",
+  "match": "✦ Gemini AI Recipe",
+  "time": "25 min",
+  "level": "Easy",
+  "servings": "2 Servings",
+  "calories": "420 kcal",
+  "ingredients": [
+    "Quantity + Ingredient name"
+  ],
+  "steps": [
+    {
+      "title": "Clear Actionable Step Title",
+      "desc": "Simple, straightforward cooking step."
+    }
+  ]
+}`;
+
+            const requestBody = {
+                contents: [
+                    {
+                        parts: [{ text: prompt }]
+                    }
+                ],
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            };
+
+            // Active model endpoints with CORS support
+            const endpoints = [
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`
+            ];
+
+            let lastError = null;
+
+            for (const url of endpoints) {
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        console.warn(`Endpoint ${url} responded with ${response.status}:`, errData);
+                        lastError = errData?.error?.message || `HTTP ${response.status}`;
+                        continue;
+                    }
+
+                    const data = await response.json();
+                    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!textResponse) {
+                        throw new Error("No recipe text returned by Gemini.");
+                    }
+
+                    let parsedRecipe;
+                    try {
+                        parsedRecipe = JSON.parse(textResponse.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim());
+                    } catch (e) {
+                        const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                            parsedRecipe = JSON.parse(jsonMatch[0]);
+                        } else {
+                            throw new Error("Could not parse recipe JSON.");
+                        }
+                    }
+
+                    parsedRecipe.id = 'ai-custom-' + Date.now();
+
+                    // Generate AI dish image matching the exact recipe
+                    const visualDesc = parsedRecipe.visualPrompt || `Delicious gourmet plate of ${parsedRecipe.name} with ${(parsedRecipe.ingredients || tags).slice(0, 3).join(', ')}, appetizing restaurant plating, professional food photography`;
+                    const seed = Math.floor(Math.random() * 900000) + 100000;
+                    parsedRecipe.imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualDesc)}?width=800&height=600&nologo=true&seed=${seed}`;
+                    parsedRecipe.image = parsedRecipe.imageUrl;
+
+                    // Save to sessionStorage for recipe.html
+                    sessionStorage.setItem('ai_custom_recipe', JSON.stringify(parsedRecipe));
+
+                    // Navigate to recipe details screen
+                    window.location.href = `recipe.html?id=${encodeURIComponent(parsedRecipe.id)}`;
+                    return;
+                } catch (err) {
+                    console.error("Gemini request error:", err);
+                    lastError = err.message;
+                }
+            }     }
+
+            modal.classList.add('hidden');
+            showError(lastError || "Failed to generate recipe from Gemini AI. Please check your network and try again.");
+        }
+
+        function showError(msg) {
+            document.getElementById('error-message').innerText = msg;
+            document.getElementById('ai-error-modal').classList.remove('hidden');
+        }
+
+        document.getElementById('ingredient-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addIngredient();
+            }
+        });
+
+        // Check for incoming query from Home search bar
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const query = params.get('q') || params.get('ingredients');
+            if (query) {
+                const container = document.getElementById('tags-container');
+                container.innerHTML = '';
+                const items = query.split(',').map(s => s.trim()).filter(Boolean);
+                items.forEach(item => createTag(item));
+                if (params.get('auto') === 'true') {
+                    generateRecipe();
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

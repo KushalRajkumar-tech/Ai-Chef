@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AiChef - Recipe Details</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-container": "#ff6b00",
+                        "primary": "#ffb693",
+                        "on-primary": "#561f00",
+                        "background": "#0d0d11",
+                        "surface": "#131317",
+                        "surface-container": "#1f1f23",
+                        "surface-container-high": "#2a292e",
+                        "surface-dim": "#131317",
+                        "on-surface": "#e4e1e7",
+                        "on-surface-variant": "#e2bfb0",
+                        "secondary": "#c7c4d8",
+                        "on-secondary-container": "#b5b3c6",
+                        "outline": "#a98a7d",
+                        "outline-variant": "#5a4136",
+                        "glass-bg": "rgba(28, 28, 42, 0.75)"
+                    },
+                    fontFamily: {
+                        "headline": ["Montserrat", "sans-serif"],
+                        "body": ["Hanken Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "card": "18px",
+                        "btn": "14px"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0D0D11;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(255, 107, 0, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 90%, rgba(255, 107, 0, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Hanken Grotesk', sans-serif;
+            color: #E4E1E7;
+        }
+        .glass-panel {
+            background: rgba(28, 28, 42, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-button {
+            box-shadow: 0 0 22px rgba(255, 107, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .glow-button:hover, .glow-button:active {
+            box-shadow: 0 0 32px rgba(255, 107, 0, 0.65);
+            transform: translateY(-1px);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #ffdbcc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-image-overlay {
+            background: linear-gradient(to top, #0D0D11 0%, rgba(13, 13, 17, 0.4) 60%, transparent 100%);
+        }
+        .checked-item {
+            text-decoration: line-through;
+            opacity: 0.45;
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col items-center pb-28">
+
+    <!-- Mobile Frame Container -->
+    <div class="w-full max-w-[390px] relative min-h-screen flex flex-col">
+
+        <!-- Top Navigation with Smart Back -->
+        <header class="glass-panel sticky top-0 z-40 flex justify-between items-center px-4 h-16 border-b border-white/10 rounded-b-2xl">
+            <button aria-label="Go Back" class="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-on-secondary-container hover:text-white transition-colors" onclick="goBack()">
+                <span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
+            </button>
+            <h1 class="font-headline font-bold text-base text-white tracking-tight" id="header-title">Recipe Details</h1>
+            <button aria-label="Save Recipe" class="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-primary-container active:scale-90 transition-transform" id="top-heart-btn" onclick="toggleSave()">
+                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">favorite</span>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow flex flex-col">
+
+            <!-- Hero Image with Overlays -->
+            <div class="relative w-full h-64 overflow-hidden border-b border-white/10 bg-[#131317]">
+                <img alt="Recipe Photo" class="w-full h-full object-cover" id="recipe-img" referrerpolicy="no-referrer" src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800&auto=format&fit=crop&q=80" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80';"/>
+                <div class="absolute inset-0 hero-image-overlay"></div>
+                
+                <!-- Floating Match Badge -->
+                <div class="absolute top-4 left-4 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-primary-container/40 flex items-center gap-1.5 shadow-lg">
+                    <span class="material-symbols-outlined text-primary-container text-sm">auto_awesome</span>
+                    <span class="font-headline text-xs font-bold text-white" id="recipe-match">Chef Verified Recipe</span>
+                </div>
+            </div>
+
+            <!-- Recipe Details Container -->
+            <div class="px-4 py-5 flex flex-col gap-6 -mt-6 relative z-10">
+
+                <!-- Recipe Header -->
+                <section class="flex flex-col gap-2">
+                    <div class="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider" id="recipe-category">
+                        <span>Indian Food • North Indian</span>
+                    </div>
+                    <h2 class="font-headline text-2xl font-bold text-white text-gradient leading-tight" id="recipe-name">
+                        Royal Butter Chicken
+                    </h2>
+                    <p class="text-xs text-on-secondary-container leading-relaxed" id="recipe-desc">
+                        Tender tandoori chicken simmered in a velvety aromatic tomato, cashew, and fenugreek butter gravy.
+                    </p>
+
+                    <!-- Stats Pill Bar -->
+                    <div class="grid grid-cols-4 gap-2 pt-2">
+                        <div class="glass-panel p-2.5 rounded-xl flex flex-col items-center text-center">
+                            <span class="material-symbols-outlined text-primary-container text-base mb-0.5">schedule</span>
+                            <span class="font-headline font-bold text-xs text-white" id="recipe-time">35 min</span>
+                            <span class="text-[10px] text-on-secondary-container">Cook time</span>
+                        </div>
+                        <div class="glass-panel p-2.5 rounded-xl flex flex-col items-center text-center">
+                            <span class="material-symbols-outlined text-primary-container text-base mb-0.5">speed</span>
+                            <span class="font-headline font-bold text-xs text-white" id="recipe-level">Medium</span>
+                            <span class="text-[10px] text-on-secondary-container">Level</span>
+                        </div>
+                        <div class="glass-panel p-2.5 rounded-xl flex flex-col items-center text-center">
+                            <span class="material-symbols-outlined text-primary-container text-base mb-0.5">person</span>
+                            <span class="font-headline font-bold text-xs text-white" id="recipe-servings">4 Servings</span>
+                            <span class="text-[10px] text-on-secondary-container">Portions</span>
+                        </div>
+                        <div class="glass-panel p-2.5 rounded-xl flex flex-col items-center text-center">
+                            <span class="material-symbols-outlined text-primary-container text-base mb-0.5">local_fire_department</span>
+                            <span class="font-headline font-bold text-xs text-white" id="recipe-calories">560</span>
+                            <span class="text-[10px] text-on-secondary-container">Calories</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Ingredients Checklist -->
+                <section class="glass-panel rounded-card p-4 flex flex-col gap-3 border border-white/10">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
+                        <h3 class="font-headline font-bold text-xs text-white uppercase tracking-wider flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary-container text-base">checklist</span>
+                            <span>Ingredients Checklist</span>
+                        </h3>
+                        <span class="text-[11px] text-primary">Tap to check off</span>
+                    </div>
+
+                    <ul class="flex flex-col gap-2.5 pt-1" id="ingredients-list">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </section>
+
+                <!-- Step-by-Step Cooking Guide -->
+                <section class="glass-panel rounded-card p-4 flex flex-col gap-4 border border-white/10">
+                    <h3 class="font-headline font-bold text-xs text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-white/10 pb-2.5">
+                        <span class="material-symbols-outlined text-primary-container text-base">format_list_numbered</span>
+                        <span>Step-by-Step Preparation</span>
+                    </h3>
+
+                    <div class="flex flex-col gap-4 relative" id="steps-container">
+                        <!-- Populated dynamically -->
+                    </div>
+                </section>
+
+                <!-- Save Action Button -->
+                <div class="pt-1">
+                    <button class="w-full bg-primary-container text-white font-headline font-bold text-sm py-4 rounded-btn flex items-center justify-center gap-2 glow-button active:scale-[0.98] transition-transform shadow-xl shadow-primary-container/25" id="save-recipe-btn" onclick="toggleSave(true)">
+                        <span class="material-symbols-outlined text-lg" id="save-btn-icon" style="font-variation-settings: 'FILL' 0;">bookmark</span>
+                        <span id="save-btn-text">Save to My Cookbook</span>
+                    </button>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Sticky Frosted Bottom Navigation Bar -->
+        <nav class="bg-[#0D0D11]/90 backdrop-blur-xl border-t border-white/10 fixed bottom-0 left-0 right-0 w-full max-w-[390px] mx-auto z-50 flex justify-around items-center h-20 px-4 pb-3">
+            
+            <!-- Home Tab -->
+            <a class="flex flex-col items-center justify-center text-on-secondary-container hover:text-white font-headline font-medium text-[11px] w-16 active:scale-95 transition-transform" href="index.html">
+                <span class="material-symbols-outlined text-[24px] mb-0.5">home</span>
+                <span>Home</span>
+            </a>
+
+            <!-- Explore Tab -->
+            <a class="flex flex-col items-center justify-center text-on-secondary-container hover:text-white font-headline font-medium text-[11px] w-16 active:scale-95 transition-transform" href="ingredients.html">
+                <span class="material-symbols-outlined text-[24px] mb-0.5">explore</span>
+                <span>Explore</span>
+            </a>
+
+            <!-- Saved Tab -->
+            <a class="flex flex-col items-center justify-center text-on-secondary-container hover:text-white font-headline font-medium text-[11px] w-16 active:scale-95 transition-transform" href="saved.html">
+                <span class="material-symbols-outlined text-[24px] mb-0.5">bookmark</span>
+                <span>Saved</span>
+            </a>
+
+        </nav>
+
+    </div>
+
+    <!-- Dynamic Recipe Database, Accurate Image Mapper & Cookbook Storage -->
+    <script>
+        function getAccurateDishImage(dishName, category, ingredients) {
+            const text = ((dishName || '') + ' ' + (category || '') + ' ' + (ingredients || []).join(' ')).toLowerCase();
+            
+            // Indian & Tandoori Specialties
+            if (text.includes('paneer') || text.includes('tikka') || text.includes('cottage cheese')) {
+                return 'https://images.unsplash.com/photo-1567184109191-37764e7fadd9?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('butter chicken') || text.includes('makhani') || text.includes('tikka masala') || text.includes('chicken curry') || text.includes('korma')) {
+                return 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('biryani') || text.includes('pulao') || text.includes('fried rice') || text.includes('basmati')) {
+                return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('tandoori') || text.includes('kebab') || text.includes('seekh') || text.includes('roast chicken') || text.includes('grilled chicken')) {
+                return 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('dal') || text.includes('lentil') || text.includes('chana') || text.includes('curry') || text.includes('sambar')) {
+                return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('halwa') || text.includes('gajar') || text.includes('carrot halwa') || text.includes('gulab jamun') || text.includes('kheer')) {
+                return 'https://images.unsplash.com/photo-1579372786545-d24232daf58c?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Pastas & Italian
+            if (text.includes('pasta') || text.includes('tagliatelle') || text.includes('spaghetti') || text.includes('carbonara') || text.includes('fettuccine') || text.includes('penne') || text.includes('lasagna') || text.includes('alfredo') || text.includes('macaroni')) {
+                return 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('pizza') || text.includes('flatbread') || text.includes('focaccia') || text.includes('calzone')) {
+                return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('risotto') || text.includes('mushroom') || text.includes('truffle')) {
+                return 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Seafood & Meats
+            if (text.includes('salmon') || text.includes('fish') || text.includes('trout') || text.includes('cod') || text.includes('tuna') || text.includes('halibut')) {
+                return 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('prawn') || text.includes('shrimp') || text.includes('lobster') || text.includes('crab') || text.includes('calamari')) {
+                return 'https://images.unsplash.com/photo-1559742811-822873691df8?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('steak') || text.includes('beef') || text.includes('ribeye') || text.includes('tenderloin') || text.includes('lamb') || text.includes('mutton')) {
+                return 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('burger') || text.includes('sandwich') || text.includes('wrap') || text.includes('sub')) {
+                return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('taco') || text.includes('burrito') || text.includes('fajita') || text.includes('quesadilla') || text.includes('mexican')) {
+                return 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Asian Noodles & Stir Fries
+            if (text.includes('noodle') || text.includes('ramen') || text.includes('pad thai') || text.includes('chow mein') || text.includes('udon') || text.includes('soba') || text.includes('stir fry')) {
+                return 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('soup') || text.includes('broth') || text.includes('chowder') || text.includes('stew')) {
+                return 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('salad') || text.includes('bowl') || text.includes('avocado') || text.includes('quinoa') || text.includes('caesar')) {
+                return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('egg') || text.includes('omelet') || text.includes('shakshuka') || text.includes('scramble') || text.includes('breakfast')) {
+                return 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // Desserts & Bakery
+            if (text.includes('chocolate') || text.includes('brownie') || text.includes('fudge') || text.includes('lava cake')) {
+                return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&auto=format&fit=crop&q=80';
+            }
+            if (text.includes('cheesecake') || text.includes('tiramisu') || text.includes('pudding') || text.includes('pancake') || text.includes('waffle') || text.includes('dessert') || text.includes('ice cream')) {
+                return 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=800&auto=format&fit=crop&q=80';
+            }
+
+            // High Quality Gourmet Food Fallback
+            return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80';
+        }
+
+        const RECIPES = {
+            'butter-chicken': {
+                id: 'butter-chicken',
+                name: 'Royal Butter Chicken (Murgh Makhani)',
+                category: 'Indian Food • North Indian',
+                desc: 'Tender tandoori chicken simmered in a velvety aromatic tomato, cashew, and fenugreek butter gravy.',
+                image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800&auto=format&fit=crop&q=80',
+                match: 'Popular Indian Masterpiece',
+                time: '35 min',
+                level: 'Medium',
+                servings: '4 Servings',
+                calories: '560 kcal',
+                ingredients: [
+                    '600g boneless chicken thighs (cubed)',
+                    '1/2 cup Greek yogurt + 1 tbsp ginger-garlic paste',
+                    '4 tbsp grass-fed butter + 1 tbsp oil',
+                    '1.5 cups smooth San Marzano tomato puree',
+                    '1/2 cup heavy whipping cream',
+                    '2 tbsp soaked cashew paste',
+                    '1 tbsp dried Kasuri Methi (crushed fenugreek leaves)',
+                    '1 tsp Kashmiri red chili powder & 1 tsp Garam Masala'
+                ],
+                steps: [
+                    { title: 'Marinate & Pan-Sear', desc: 'Marinate chicken in yogurt, ginger-garlic, and spices for 20 mins. Sear in a hot skillet until lightly charred.' },
+                    { title: 'Simmer Silky Tomato Base', desc: 'Melt 2 tbsp butter. Cook tomato puree, Kashmiri chili, and cashew paste on medium-low until oil separates.' },
+                    { title: 'Enrich with Cream & Fenugreek', desc: 'Stir in heavy cream, remaining butter, garam masala, and roasted kasuri methi until velvety smooth.' },
+                    { title: 'Simmer Chicken & Garnish', desc: 'Add seared chicken pieces into the gravy and simmer for 6 minutes. Garnish with a swirl of cream and fresh cilantro.' }
+                ]
+            },
+            'paneer-tikka': {
+                id: 'paneer-tikka',
+                name: 'Smoky Paneer Tikka Masala',
+                category: 'Indian Food • Vegetarian',
+                desc: 'Char-grilled cottage cheese cubes and crisp peppers tossed in a robust spiced onion-tomato masala.',
+                image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=80',
+                match: 'Vegetarian Classic',
+                time: '30 min',
+                level: 'Easy',
+                servings: '3 Servings',
+                calories: '480 kcal',
+                ingredients: [
+                    '400g fresh Malai Paneer (cubed)',
+                    '1 large diced red onion & green bell pepper',
+                    '1/2 cup hung curd with mustard oil & chaat masala',
+                    '2 finely chopped onions & 3 pureed tomatoes',
+                    '1 tbsp ginger-garlic paste',
+                    '1 tsp cumin seeds, turmeric, and coriander powder',
+                    'Fresh lemon juice & coriander leaves'
+                ],
+                steps: [
+                    { title: 'Coat in Tandoori Marinade', desc: 'Toss paneer cubes and peppers in spiced hung curd with mustard oil. Let rest for 15 minutes.' },
+                    { title: 'Char-Grill Paneer', desc: 'Grill skewers or pan-roast in a smoking cast-iron pan until paneer edges develop golden brown char.' },
+                    { title: 'Build Onion-Tomato Masala', desc: 'Sauté cumin, chopped onions, and ginger-garlic until deeply caramelized. Add tomato puree and ground spices.' },
+                    { title: 'Combine & Finish', desc: 'Gently fold grilled paneer and peppers into the rich masala gravy. Simmer for 3 minutes and finish with lemon juice.' }
+                ]
+            },
+            'dum-biryani': {
+                id: 'dum-biryani',
+                name: 'Hyderabadi Dum Biryani',
+                category: 'Indian Food • Royal Feast',
+                desc: 'Fragrant long-grain basmati rice layered with spiced saffron marinade, clarified ghee, caramelized onions, and fresh mint.',
+                image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+                match: 'Royal Heritage Dish',
+                time: '50 min',
+                level: 'Hard',
+                servings: '4 Servings',
+                calories: '650 kcal',
+                ingredients: [
+                    '500g bone-in chicken or mixed seasonal vegetables',
+                    '2 cups aged Royal Basmati rice (soaked 30 mins)',
+                    '1/2 cup pure desi ghee + 1/2 cup fried golden onions (birista)',
+                    '1 cup thick whisked curd',
+                    '1 tsp saffron soaked in 4 tbsp warm milk',
+                    '2 tbsp fresh mint and coriander leaves',
+                    'Whole garam masalas (star anise, cloves, green cardamom, bay leaf)',
+                    '1 tbsp Biryani masala spice blend'
+                ],
+                steps: [
+                    { title: 'Marinate Filling', desc: 'Combine protein/vegetables with yogurt, biryani masala, ginger-garlic, mint, and half the fried onions. Marinate 30 mins.' },
+                    { title: 'Parboil Basmati Rice', desc: 'Boil soaked basmati rice in salted aromatic whole spice water until 70% cooked. Drain immediately.' },
+                    { title: 'Layering (Dum Stage)', desc: 'In a heavy pot, layer the marinated base, parboiled fragrant rice, saffron milk, desi ghee, and fried onions.' },
+                    { title: 'Slow Dum Cooking', desc: 'Seal tightly with foil or dough. Cook on high for 5 minutes, then lowest heat on a tawa for 25 minutes. Rest 10 mins before fluffing.' }
+                ]
+            },
+            'dal-makhani': {
+                id: 'dal-makhani',
+                name: 'Slow-Cooked Dal Makhani',
+                category: 'Indian Food • Creamy Lentils',
+                desc: 'Whole black lentils slow-simmered overnight with ripe tomatoes, white butter, and aromatic ground spices.',
+                image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80',
+                match: 'Traditional Slow Food',
+                time: '45 min',
+                level: 'Medium',
+                servings: '4 Servings',
+                calories: '410 kcal',
+                ingredients: [
+                    '1.5 cups whole black urad dal + 1/4 cup red kidney beans (soaked overnight)',
+                    '1 cup fresh tomato puree',
+                    '4 tbsp white cultured butter (Makhana)',
+                    '1/4 cup heavy cream',
+                    '1 tbsp ginger-garlic paste',
+                    '1 tsp Kashmiri degi mirch & 1/2 tsp roasted cumin powder',
+                    '1 tsp crushed Kasuri Methi'
+                ],
+                steps: [
+                    { title: 'Pressure Cook Lentils', desc: 'Boil soaked black lentils and kidney beans with salt and ginger juliennes until melt-in-mouth soft.' },
+                    { title: 'Bhuna Tomato Tadka', desc: 'In a pan, cook tomato puree and Kashmiri chili in 2 tbsp butter until glossy and aromatic.' },
+                    { title: 'Slow Mash & Simmer', desc: 'Add cooked lentils and mash gently against the pot walls. Simmer on low for 30 minutes, adding water as needed.' },
+                    { title: 'Enrich with Butter & Cream', desc: 'Finish with remaining butter, fresh cream, and crushed fenugreek leaves. Rest for 10 minutes before serving.' }
+                ]
+            },
+            'salmon': {
+                id: 'salmon',
+                name: 'Garlic Butter Salmon with Asparagus',
+                category: 'Chef\'s Favorites • Seafood',
+                desc: 'Pan-seared Atlantic salmon fillet glazed with garlic-lemon butter, served with crisp roasted asparagus.',
+                image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&auto=format&fit=crop&q=80',
+                match: 'Gourmet Healthy Selection',
+                time: '25 min',
+                level: 'Easy',
+                servings: '2 Servings',
+                calories: '490 kcal',
+                ingredients: [
+                    '2 fresh center-cut Atlantic salmon fillets (skin-on)',
+                    '1 bunch fresh tender asparagus (trimmed)',
+                    '3 tbsp European grass-fed butter',
+                    '4 cloves garlic (minced)',
+                    '1 organic lemon (juiced & sliced)',
+                    '2 tbsp extra virgin olive oil',
+                    'Fresh dill, sea salt & freshly cracked black pepper'
+                ],
+                steps: [
+                    { title: 'Prep & Season', desc: 'Pat salmon fillets completely dry with paper towels. Season both sides generously with sea salt, black pepper, and garlic powder.' },
+                    { title: 'Sear Crispy Skin', desc: 'Heat olive oil in a stainless steel skillet over medium-high heat. Place salmon skin-side down and press gently for 4 minutes until skin is golden and ultra-crispy.' },
+                    { title: 'Baste in Garlic Butter', desc: 'Flip fillets. Add butter, minced garlic, and lemon slices. Spoon foaming garlic-herb butter continuously over the salmon for 2-3 minutes.' },
+                    { title: 'Sauté Asparagus & Plate', desc: 'Toss asparagus into the same buttery skillet for 3 minutes until tender-crisp. Plate fillets, spoon pan juices over top, and garnish with fresh dill.' }
+                ]
+            },
+            'truffle-pasta': {
+                id: 'truffle-pasta',
+                name: 'Truffle Mushroom Tagliatelle',
+                category: 'Chef\'s Favorites • Handmade Pasta',
+                desc: 'Al dente handmade egg pasta ribboned in a velvety black truffle and wild forest mushroom cream emulsion.',
+                image: 'truffle_pasta.jpg',
+                match: 'Artisan Pasta Selection',
+                time: '20 min',
+                level: 'Easy',
+                servings: '2 Servings',
+                calories: '520 kcal',
+                ingredients: [
+                    '250g fresh artisan Tagliatelle or Fettuccine pasta',
+                    '200g mixed wild mushrooms (Cremini, Shiitake, Chanterelle)',
+                    '2 tbsp Black Truffle butter (or 1 tsp truffle oil)',
+                    '1/2 cup heavy whipping cream',
+                    '1/2 cup freshly grated 24-month Parmigiano-Reggiano',
+                    '2 shallots & 2 cloves garlic (finely minced)',
+                    '1 tbsp fresh flat-leaf parsley & cracked black pepper'
+                ],
+                steps: [
+                    { title: 'Cook Pasta Al Dente', desc: 'Bring a large pot of salted water to a rapid rolling boil. Cook fresh tagliatelle for 3 minutes until perfectly al dente. Reserve 1/2 cup starchy pasta water.' },
+                    { title: 'Brown Wild Mushrooms', desc: 'In a wide skillet, heat truffle butter and olive oil over high heat. Sear sliced mushrooms undisturbed for 3 minutes until deeply caramelized.' },
+                    { title: 'Build Truffle Emulsion', desc: 'Lower heat. Sauté shallots and garlic for 1 minute. Pour in cream and 1/4 cup reserved pasta water, simmering gently into a glossy velouté.' },
+                    { title: 'Toss, Mount Cheese & Serve', desc: 'Transfer cooked pasta directly into the pan. Toss vigorously with grated Parmigiano-Reggiano until a creamy, clinging sauce forms. Finish with cracked black pepper and shaved truffle.' }
+                ]
+            },
+            'lava-cake': {
+                id: 'lava-cake',
+                name: 'Molten Belgian Chocolate Lava Cake',
+                category: 'Artisan Desserts • Warm Patisserie',
+                desc: 'Warm decadently rich 70% Valrhona dark chocolate cake with a luscious, flowing molten chocolate core.',
+                image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&auto=format&fit=crop&q=80',
+                match: 'Warm Dessert Masterpiece',
+                time: '25 min',
+                level: 'Medium',
+                servings: '2 Servings',
+                calories: '460 kcal',
+                ingredients: [
+                    '120g 70% dark Belgian bittersweet chocolate (coarsely chopped)',
+                    '1/2 cup unsalted French butter',
+                    '2 large organic eggs + 2 egg yolks (room temp)',
+                    '1/3 cup confectioner\'s organic sugar',
+                    '2 tbsp all-purpose flour (sifted)',
+                    '1 tsp Madagascar vanilla bean extract',
+                    'Pinch of fine sea salt & Dutch-process cocoa powder for dusting',
+                    'Fresh organic raspberries & premium vanilla bean ice cream to serve'
+                ],
+                steps: [
+                    { title: 'Melt Dark Chocolate & Butter', desc: 'Preheat oven to 425°F (220°C). Butter two ceramic ramekins and dust thoroughly with cocoa powder. Gently melt chopped chocolate and butter in a heatproof bowl over simmering water until glossy.' },
+                    { title: 'Whisk Egg & Sugar Batter', desc: 'In a separate bowl, whisk eggs, egg yolks, sugar, vanilla, and salt on high speed until pale, thick, and ribbon-like (approx. 2 minutes).' },
+                    { title: 'Fold & Fill Ramekins', desc: 'Gently fold melted chocolate into the egg mixture. Sift in flour and fold with a spatula until just combined. Divide evenly between ramekins.' },
+                    { title: 'Flash-Bake & Invert', desc: 'Bake at 425°F for exactly 11 minutes until sides are set and center is soft. Rest 1 minute, run a knife around edges, invert onto dessert plates, dust with powdered sugar, and serve with cold vanilla gelato.' }
+                ]
+            },
+            'halwa': {
+                id: 'halwa',
+                name: 'Royal Gajar Ka Halwa (Carrot Halwa)',
+                category: 'Artisan Desserts • Royal Indian Halwa',
+                desc: 'Slow-cooked tender grated Delhi carrots simmered in rich whole milk, infused with green cardamom, roasted cashews, and golden desi ghee.',
+                image: 'assets/images/gajar_ka_halwa.jpg',
+                match: 'Royal Indian Dessert',
+                time: '35 min',
+                level: 'Easy',
+                servings: '4 Servings',
+                calories: '390 kcal',
+                ingredients: [
+                    '500g fresh tender red carrots (peeled & finely grated)',
+                    '3 cups full-cream whole milk',
+                    '4 tbsp pure desi ghee',
+                    '1/2 cup organic sugar (or condensed milk)',
+                    '1/2 cup crumbled fresh Khoya / Mawa (or milk powder)',
+                    '1 tsp freshly ground green cardamom powder',
+                    '2 tbsp golden roasted cashews, raisins & slivered almonds',
+                    'Pinch of saffron strands soaked in warm milk'
+                ],
+                steps: [
+                    { title: 'Sauté Grated Carrots in Ghee', desc: 'Heat 2 tbsp desi ghee in a heavy-bottomed kadai. Sauté finely grated carrots for 5 minutes on medium heat until fragrant and slightly tender.' },
+                    { title: 'Slow Simmer in Whole Milk', desc: 'Pour in 3 cups of full-cream milk and saffron. Cook on medium-low, stirring occasionally, until the milk is completely absorbed by the carrots.' },
+                    { title: 'Sweeten & Caramelize', desc: 'Add sugar and remaining 2 tbsp ghee. Cook for 8 minutes until the halwa deepens to a lustrous rich ruby-amber color.' },
+                    { title: 'Fold Khoya & Roasted Nuts', desc: 'Stir in crumbled khoya (mawa) and cardamom powder. Garnish with golden-fried cashews, pistachios, and slivered almonds. Serve warm.' }
+                ]
+            }
+        };
+
+        let currentRecipe = null;
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function getUserSavedRecipes() {
+            try {
+                return JSON.parse(localStorage.getItem('ai_user_saved_recipes') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function isRecipeSaved(recipe) {
+            if (!recipe) return false;
+            const savedList = getUserSavedRecipes();
+            return savedList.some(r => r.id === recipe.id || (r.name && recipe.name && r.name.toLowerCase() === recipe.name.toLowerCase()));
+        }
+
+        function updateSaveUI(isSaved) {
+            const heart = document.getElementById('top-heart-btn')?.querySelector('span');
+            if (heart) {
+                heart.style.fontVariationSettings = isSaved ? "'FILL' 1" : "'FILL' 0";
+                heart.style.color = isSaved ? "#ff6b00" : "#ffffff";
+            }
+            const saveBtnText = document.getElementById('save-btn-text');
+            const saveBtnIcon = document.getElementById('save-btn-icon');
+            if (saveBtnText) {
+                saveBtnText.innerText = isSaved ? "Saved in Cookbook ✓" : "Save to My Cookbook";
+            }
+            if (saveBtnIcon) {
+                saveBtnIcon.innerText = isSaved ? "bookmark_added" : "bookmark";
+                saveBtnIcon.style.fontVariationSettings = isSaved ? "'FILL' 1" : "'FILL' 0";
+            }
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('recipe-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'recipe-toast';
+                toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-surface-container-high border border-primary-container/50 text-white px-4 py-2.5 rounded-full shadow-2xl z-50 text-xs font-semibold font-headline flex items-center gap-2 transition-all duration-300 pointer-events-none opacity-0';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<span class="material-symbols-outlined text-primary-container text-sm" style="font-variation-settings: 'FILL' 1;">bookmark</span><span>${msg}</span>`;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        function toggleSave(fromBottomBtn = false) {
+            if (!currentRecipe) return;
+
+            let savedList = getUserSavedRecipes();
+            const index = savedList.findIndex(r => r.id === currentRecipe.id || (r.name && currentRecipe.name && r.name.toLowerCase() === currentRecipe.name.toLowerCase()));
+
+            if (index >= 0) {
+                // Remove from saved list
+                savedList.splice(index, 1);
+                localStorage.setItem('ai_user_saved_recipes', JSON.stringify(savedList));
+                updateSaveUI(false);
+                showToast("Removed from Cookbook");
+            } else {
+                // Add to saved list
+                const recipeToSave = {
+                    ...currentRecipe,
+                    id: currentRecipe.id || ('ai-saved-' + Date.now()),
+                    isSaved: true
+                };
+                savedList.unshift(recipeToSave);
+                localStorage.setItem('ai_user_saved_recipes', JSON.stringify(savedList));
+                updateSaveUI(true);
+                showToast("Saved to your Cookbook!");
+            }
+        }
+
+        function loadRecipe() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id') || 'butter-chicken';
+            let data = null;
+
+            // 1. Check if ID matches sessionStorage AI recipe
+            if (id.startsWith('ai-custom')) {
+                const stored = sessionStorage.getItem('ai_custom_recipe');
+                if (stored) {
+                    try {
+                        data = JSON.parse(stored);
+                    } catch (e) {
+                        console.error("Failed to parse custom recipe", e);
+                    }
+                }
+            }
+
+            // 2. Check if ID or recipe exists in localStorage user saved recipes
+            if (!data) {
+                const savedList = getUserSavedRecipes();
+                data = savedList.find(r => r.id === id || (r.name && id && r.name.toLowerCase() === id.toLowerCase()));
+            }
+
+            // 3. Check static recipes
+            if (!data) {
+                data = RECIPES[id];
+            }
+
+            // 4. Fallback if not found
+            if (!data) {
+                data = RECIPES['butter-chicken'];
+            }
+
+            currentRecipe = data;
+
+            // Compute accurate image
+            const finalImage = data.imageUrl || data.image || getAccurateDishImage(data.name, data.category, data.ingredients);
+            currentRecipe.imageUrl = finalImage;
+            currentRecipe.image = finalImage;
+
+            document.getElementById('header-title').innerText = data.name;
+            document.getElementById('recipe-name').innerText = data.name;
+            document.getElementById('recipe-category').innerHTML = `<span>${data.category}</span>`;
+            document.getElementById('recipe-desc').innerText = data.desc;
+            
+            const imgEl = document.getElementById('recipe-img');
+            imgEl.src = finalImage;
+            imgEl.alt = data.name;
+
+            document.getElementById('recipe-match').innerText = data.match || "✦ Gemini AI Recipe";
+            document.getElementById('recipe-time').innerText = data.time || "25 min";
+            document.getElementById('recipe-level').innerText = data.level || "Easy";
+            document.getElementById('recipe-servings').innerText = data.servings || "2 Servings";
+            document.getElementById('recipe-calories').innerText = data.calories || "420 kcal";
+
+            // Render Ingredients
+            const ingList = document.getElementById('ingredients-list');
+            ingList.innerHTML = (data.ingredients || []).map(ing => `
+                <li class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer transition-colors" onclick="toggleItem(this)">
+                    <div class="w-5 h-5 rounded-full border border-primary-container/60 flex items-center justify-center transition-colors check-circle">
+                        <span class="material-symbols-outlined text-xs text-white opacity-0 check-icon">check</span>
+                    </div>
+                    <span class="text-xs font-medium text-white flex-grow item-text">${ing}</span>
+                </li>
+            `).join('');
+
+            // Render Steps (supports both string instructions and title/desc objects)
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.innerHTML = (data.steps || []).map((step, idx) => {
+                const title = typeof step === 'string' ? `Step ${idx + 1}` : (step.title || `Step ${idx + 1}`);
+                const desc = typeof step === 'string' ? step : (step.desc || '');
+                return `
+                <div class="flex gap-3 relative">
+                    <div class="w-7 h-7 rounded-full ${idx === 0 ? 'bg-primary-container text-white font-bold shadow-md shadow-primary-container/30' : 'bg-surface-container-high border border-white/20 text-white font-bold'} font-headline text-xs flex items-center justify-center flex-none">
+                        ${idx + 1}
+                    </div>
+                    <div class="flex flex-col gap-1 pt-0.5">
+                        <h4 class="font-headline font-semibold text-xs text-white">${title}</h4>
+                        <p class="text-xs text-on-secondary-container leading-relaxed">${desc}</p>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // Sync save UI state
+            updateSaveUI(isRecipeSaved(currentRecipe));
+        }
+
+        function toggleItem(el) {
+            const text = el.querySelector('.item-text');
+            const circle = el.querySelector('.check-circle');
+            const icon = el.querySelector('.check-icon');
+
+            if (text.classList.contains('checked-item')) {
+                text.classList.remove('checked-item');
+                circle.classList.remove('bg-primary-container');
+                icon.classList.add('opacity-0');
+            } else {
+                text.classList.add('checked-item');
+                circle.classList.add('bg-primary-container');
+                icon.classList.remove('opacity-0');
+            }
+        }
+
+        // Initialize recipe on page load
+        window.addEventListener('DOMContentLoaded', loadRecipe);
+    </script>
+
+</body>
+</html>

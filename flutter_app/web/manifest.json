@@ -1,0 +1,11 @@
+{
+  "name": "AiChef - Obsidian Gourmet",
+  "short_name": "AiChef",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0D0D11",
+  "theme_color": "#FF6B00",
+  "description": "AiChef - Luxury Gourmet Private Master Chef",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}

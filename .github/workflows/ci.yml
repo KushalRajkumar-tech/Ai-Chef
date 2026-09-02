@@ -1,0 +1,41 @@
+name: AiChef CI
+
+on:
+  push:
+    branches: [ main, feature/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-and-build:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Flutter Dependencies
+        run: |
+          cd flutter_app
+          flutter pub get
+
+      - name: Analyze Flutter Code
+        run: |
+          cd flutter_app
+          flutter analyze --no-fatal-infos
+
+      - name: Build Flutter Web
+        run: |
+          cd flutter_app
+          flutter build web --release
+
+      - name: Validate Web Assets
+        run: |
+          test -f index.html && test -f recipe.html && test -f saved.html && test -f ingredients.html
+          echo "All Web and Flutter entry points validated successfully!"

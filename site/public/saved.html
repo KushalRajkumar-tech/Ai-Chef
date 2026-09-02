@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AiChef - My Saved Cookbook</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-container": "#ff6b00",
+                        "primary": "#ffb693",
+                        "on-primary": "#561f00",
+                        "background": "#0d0d11",
+                        "surface": "#131317",
+                        "surface-container": "#1f1f23",
+                        "surface-container-high": "#2a292e",
+                        "surface-dim": "#131317",
+                        "on-surface": "#e4e1e7",
+                        "on-surface-variant": "#e2bfb0",
+                        "secondary": "#c7c4d8",
+                        "on-secondary-container": "#b5b3c6",
+                        "outline": "#a98a7d",
+                        "outline-variant": "#5a4136",
+                        "glass-bg": "rgba(28, 28, 42, 0.75)"
+                    },
+                    fontFamily: {
+                        "headline": ["Montserrat", "sans-serif"],
+                        "body": ["Hanken Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "card": "18px",
+                        "btn": "14px"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0D0D11;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(255, 107, 0, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 90%, rgba(255, 107, 0, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Hanken Grotesk', sans-serif;
+            color: #E4E1E7;
+        }
+        .glass-panel {
+            background: rgba(28, 28, 42, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-panel-active {
+            background: rgba(255, 107, 0, 0.18);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 107, 0, 0.45);
+        }
+        .glow-button {
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.35);
+            transition: all 0.3s ease;
+        }
+        .glow-button:hover, .glow-button:active {
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
+            transform: translateY(-1px);
+        }
+        .card-hover {
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .card-hover:hover {
+            border-color: rgba(255, 107, 0, 0.4);
+            transform: translateY(-2px);
+        }
+        .card-hover:active {
+            transform: scale(0.97);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #ffdbcc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-image-overlay {
+            background: linear-gradient(to top, rgba(13, 13, 17, 0.95) 0%, rgba(13, 13, 17, 0.3) 50%, transparent 100%);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-on-surface min-h-screen flex flex-col items-center pb-28">
+
+    <!-- Mobile Frame Container -->
+    <div class="w-full max-w-[390px] relative min-h-screen flex flex-col">
+
+        <!-- Top App Bar with Smart Back -->
+        <header class="glass-panel sticky top-0 z-40 flex justify-between items-center px-4 h-16 border-b border-white/10 rounded-b-2xl">
+            <button aria-label="Go Back" class="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-on-secondary-container hover:text-white transition-colors" onclick="goBack()">
+                <span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
+            </button>
+            <h1 class="font-headline font-bold text-base text-white tracking-tight flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-primary-container text-lg" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+                <span>My Cookbook</span>
+            </h1>
+            <div class="w-9 h-9"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow px-4 pt-5 flex flex-col gap-5">
+
+            <!-- Header & Summary Stats -->
+            <section class="flex flex-col gap-3">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <div class="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-wider">
+                            <span>Saved Library</span>
+                        </div>
+                        <h2 class="font-headline text-2xl font-bold leading-tight text-gradient">
+                            My Saved Recipes
+                        </h2>
+                    </div>
+                    <span class="text-xs text-on-secondary-container font-medium pb-1" id="saved-count-label">0 Recipes</span>
+                </div>
+
+                <!-- Collection Filter Tabs -->
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar -mx-4 px-4 pt-1" id="saved-tabs">
+                    <button class="saved-tab glass-panel-active px-3.5 py-1.5 rounded-full text-xs font-headline font-semibold text-white whitespace-nowrap" onclick="filterSaved(this, 'all')">
+                        All Saved
+                    </button>
+                    <button class="saved-tab glass-panel px-3.5 py-1.5 rounded-full text-xs font-headline font-medium text-on-secondary-container hover:text-white whitespace-nowrap" id="ai-tab-btn" onclick="filterSaved(this, 'ai')">
+                        ✦ AI Generated
+                    </button>
+                    <button class="saved-tab glass-panel px-3.5 py-1.5 rounded-full text-xs font-headline font-medium text-on-secondary-container hover:text-white whitespace-nowrap" onclick="filterSaved(this, 'indian')">
+                        Indian Food
+                    </button>
+                    <button class="saved-tab glass-panel px-3.5 py-1.5 rounded-full text-xs font-headline font-medium text-on-secondary-container hover:text-white whitespace-nowrap" onclick="filterSaved(this, 'favorites')">
+                        Chef's Favorites
+                    </button>
+                    <button class="saved-tab glass-panel px-3.5 py-1.5 rounded-full text-xs font-headline font-medium text-on-secondary-container hover:text-white whitespace-nowrap" onclick="filterSaved(this, 'desserts')">
+                        Desserts
+                    </button>
+                </div>
+            </section>
+
+            <!-- Dynamic 2-Column Saved Recipes Grid -->
+            <section class="grid grid-cols-2 gap-3.5" id="saved-grid">
+                <!-- Populated dynamically via renderCookbook() -->
+            </section>
+
+            <!-- Empty State Container -->
+            <div class="hidden flex-col items-center justify-center py-16 text-center gap-3" id="empty-state">
+                <div class="w-16 h-16 rounded-full bg-primary-container/10 border border-primary-container/30 flex items-center justify-center text-primary-container mb-2">
+                    <span class="material-symbols-outlined text-3xl">bookmark_border</span>
+                </div>
+                <h3 class="font-headline font-bold text-base text-white">No Saved Recipes Found</h3>
+                <p class="text-xs text-on-secondary-container max-w-[240px] leading-relaxed">
+                    Generate recipes using AI or explore curated dishes to save them in your cookbook.
+                </p>
+                <a class="mt-2 px-5 py-2.5 bg-primary-container text-white text-xs font-headline font-bold rounded-full glow-button" href="index.html">
+                    Explore & Generate Recipes
+                </a>
+            </div>
+
+        </main>
+
+        <!-- Sticky Frosted Bottom Navigation Bar -->
+        <nav class="bg-[#0D0D11]/90 backdrop-blur-xl border-t border-white/10 fixed bottom-0 left-0 right-0 w-full max-w-[390px] mx-auto z-50 flex justify-around items-center h-20 px-4 pb-3">
+            
+            <!-- Home Tab -->
+            <a class="flex flex-col items-center justify-center text-on-secondary-container hover:text-white font-headline font-medium text-[11px] w-16 active:scale-95 transition-transform" href="index.html">
+                <span class="material-symbols-outlined text-[24px] mb-0.5">home</span>
+                <span>Home</span>
+            </a>
+
+            <!-- Explore Tab -->
+            <a class="flex flex-col items-center justify-center text-on-secondary-container hover:text-white font-headline font-medium text-[11px] w-16 active:scale-95 transition-transform" href="ingredients.html">
+                <span class="material-symbols-outlined text-[24px] mb-0.5">explore</span>
+                <span>Explore</span>
+            </a>
+
+            <!-- Saved Tab (Active) -->
+            <a class="flex flex-col items-center justify-center text-primary-container font-headline font-bold text-[11px] w-16 relative active:scale-95 transition-transform" href="saved.html">
+                <div class="absolute -top-3 w-8 h-1 rounded-full bg-primary-container shadow-sm shadow-primary-container"></div>
+                <span class="material-symbols-outlined text-[24px] mb-0.5" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+                <span>Saved</span>
+            </a>
+
+        </nav>
+
+    </div>
+
+    <!-- Script for Dynamic Cookbook Rendering & Clean Index-based Action Routing -->
+    <script>
+        const DEFAULT_RECIPES = [
+            {
+                id: 'butter-chicken',
+                name: 'Royal Butter Chicken',
+                categoryGroup: 'indian',
+                image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=500&auto=format&fit=crop&q=80',
+                rating: '4.9',
+                time: '35m',
+                level: 'Medium',
+                isDefault: true
+            },
+            {
+                id: 'paneer-tikka',
+                name: 'Paneer Tikka Masala',
+                categoryGroup: 'indian',
+                image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80',
+                rating: '4.8',
+                time: '30m',
+                level: 'Easy',
+                isDefault: true
+            },
+            {
+                id: 'salmon',
+                name: 'Garlic Butter Salmon',
+                categoryGroup: 'favorites',
+                image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80',
+                rating: '4.9',
+                time: '25m',
+                level: 'Easy',
+                isDefault: true
+            },
+            {
+                id: 'truffle-pasta',
+                name: 'Truffle Tagliatelle',
+                categoryGroup: 'favorites',
+                image: 'truffle_pasta.jpg',
+                rating: '4.8',
+                time: '20m',
+                level: 'Easy',
+                isDefault: true
+            },
+            {
+                id: 'dal-makhani',
+                name: 'Slow Dal Makhani',
+                categoryGroup: 'indian',
+                image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=500&auto=format&fit=crop&q=80',
+                rating: '4.8',
+                time: '45m',
+                level: 'Medium',
+                isDefault: true
+            },
+            {
+                id: 'lava-cake',
+                name: 'Molten Lava Cake',
+                categoryGroup: 'desserts',
+                image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&auto=format&fit=crop&q=80',
+                rating: '4.9',
+                time: '25m',
+                level: 'Medium',
+                isDefault: true
+            },
+            {
+                id: 'halwa',
+                name: 'Gajar Ka Halwa',
+                categoryGroup: 'desserts',
+                image: 'assets/images/gajar_ka_halwa.jpg',
+                rating: '4.9',
+                time: '35m',
+                level: 'Easy',
+                isDefault: true
+            }
+        ];
+
+        let currentFilter = 'all';
+        window.__COOKBOOK_ITEMS = [];
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function getUserSavedRecipes() {
+            try {
+                return JSON.parse(localStorage.getItem('ai_user_saved_recipes') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function getRemovedDefaults() {
+            try {
+                return JSON.parse(localStorage.getItem('ai_removed_default_recipes') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function toggleSaveByIndex(event, index) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const r = window.__COOKBOOK_ITEMS[index];
+            if (!r) return;
+
+            if (r.isCustom) {
+                let userSaved = getUserSavedRecipes();
+                userSaved = userSaved.filter(item => item.id !== r.id && item.name !== r.name);
+                localStorage.setItem('ai_user_saved_recipes', JSON.stringify(userSaved));
+            } else {
+                let removed = getRemovedDefaults();
+                if (removed.includes(r.id)) {
+                    removed = removed.filter(id => id !== r.id);
+                } else {
+                    removed.push(r.id);
+                }
+                localStorage.setItem('ai_removed_default_recipes', JSON.stringify(removed));
+            }
+
+            renderCookbook();
+        }
+
+        function openCardRecipeByIndex(index) {
+            const r = window.__COOKBOOK_ITEMS[index];
+            if (!r) return;
+
+            if (r.isCustom && r.rawRecipe) {
+                sessionStorage.setItem('ai_custom_recipe', JSON.stringify(r.rawRecipe));
+                window.location.href = `recipe.html?id=${encodeURIComponent(r.id || 'ai-custom')}`;
+            } else {
+                window.location.href = `recipe.html?id=${encodeURIComponent(r.id)}`;
+            }
+        }
+
+        function renderCookbook() {
+            const grid = document.getElementById('saved-grid');
+            const emptyState = document.getElementById('empty-state');
+            const removedDefaults = getRemovedDefaults();
+            const userSaved = getUserSavedRecipes();
+
+            // Active default recipes
+            const activeDefaults = DEFAULT_RECIPES.filter(r => !removedDefaults.includes(r.id));
+
+            // Custom AI saved recipes formatted
+            const customRecipes = userSaved.map(r => ({
+                id: r.id || ('ai-saved-' + Date.now()),
+                name: r.name || 'AI Custom Dish',
+                categoryGroup: 'ai',
+                image: r.imageUrl || r.image || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=80',
+                rating: '5.0',
+                time: r.time || '25m',
+                level: r.level || 'Easy',
+                isCustom: true,
+                rawRecipe: r
+            }));
+
+            // Combine: custom recipes first, then curated defaults
+            const allRecipes = [...customRecipes, ...activeDefaults];
+
+            // Filter
+            const filtered = allRecipes.filter(r => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'ai') return r.isCustom === true;
+                return r.categoryGroup === currentFilter;
+            });
+
+            window.__COOKBOOK_ITEMS = filtered;
+
+            // Update Count Label
+            document.getElementById('saved-count-label').innerText = `${filtered.length} Recipe${filtered.length !== 1 ? 's' : ''}`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            grid.innerHTML = filtered.map((r, index) => {
+                const safeName = escapeHtml(r.name);
+                const safeTime = escapeHtml(r.time);
+                const safeLevel = escapeHtml(r.level);
+                const safeRating = escapeHtml(r.rating);
+                const safeImage = escapeHtml(r.image);
+
+                return `
+                <div class="saved-card glass-panel rounded-card overflow-hidden card-hover block group relative border border-white/10 cursor-pointer" onclick="openCardRecipeByIndex(${index})">
+                    <div class="relative h-32 w-full overflow-hidden bg-[#131317]">
+                        <img alt="${safeName}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerpolicy="no-referrer" src="${safeImage}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=80';"/>
+                        <div class="absolute inset-0 hero-image-overlay"></div>
+                        
+                        <div class="absolute top-2 left-2 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-0.5 shadow-sm">
+                            <span class="material-symbols-outlined text-primary-container text-[10px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="font-headline text-[10px] font-bold text-white">${safeRating}</span>
+                        </div>
+
+                        ${r.isCustom ? `
+                        <div class="absolute bottom-2 left-2 bg-primary-container/95 backdrop-blur-md px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
+                            <span class="material-symbols-outlined text-white text-[10px]">auto_awesome</span>
+                            <span class="font-headline text-[9px] font-bold text-white uppercase tracking-wider">AI Recipe</span>
+                        </div>
+                        ` : ''}
+
+                        <button class="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-primary-container active:scale-90 transition-transform" onclick="toggleSaveByIndex(event, ${index})">
+                            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                        </button>
+                    </div>
+
+                    <div class="p-3 flex flex-col gap-1.5">
+                        <h3 class="font-headline font-bold text-xs text-white group-hover:text-primary transition-colors line-clamp-1">
+                            ${safeName}
+                        </h3>
+                        <div class="flex items-center justify-between text-[10px] text-on-secondary-container">
+                            <span class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[12px] text-primary-container">schedule</span>
+                                <span class="font-medium">${safeTime}</span>
+                            </span>
+                            <span class="text-primary font-semibold">${safeLevel}</span>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function filterSaved(btn, cat) {
+            currentFilter = cat;
+            document.querySelectorAll('.saved-tab').forEach(t => {
+                t.classList.remove('glass-panel-active', 'text-white', 'font-semibold');
+                t.classList.add('glass-panel', 'text-on-secondary-container', 'font-medium');
+            });
+            btn.classList.remove('glass-panel', 'text-on-secondary-container', 'font-medium');
+            btn.classList.add('glass-panel-active', 'text-white', 'font-semibold');
+
+            renderCookbook();
+        }
+
+        window.addEventListener('DOMContentLoaded', renderCookbook);
+    </script>
+
+</body>
+</html>
