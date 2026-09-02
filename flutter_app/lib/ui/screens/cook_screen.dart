@@ -62,8 +62,13 @@ class _CookScreenState extends State<CookScreen> {
   }
 
   static const Map<String, String> _culinaryMap = {
+    'chicken kebab': 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
+    'kebab': 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
+    'seekh kebab': 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
+    'tandoori': 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
+    'tandoori chicken': 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80',
     'paneer tikka': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=80',
-    'kadai paneer': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Paneer_tikka.jpg/640px-Paneer_tikka.jpg',
+    'kadai paneer': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=80',
     'paneer bhurji': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80',
     'palak paneer': 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&auto=format&fit=crop&q=80',
     'matar paneer': 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80',
@@ -81,7 +86,7 @@ class _CookScreenState extends State<CookScreen> {
     'fried rice': 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&auto=format&fit=crop&q=80',
     'noodles': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80',
     'pasta': 'assets/images/truffle_pasta.jpg',
-    'truffle pasta': 'assets/images/truffle_pasta.jpg',
+    'tagliatelle': 'assets/images/truffle_pasta.jpg',
     'carbonara': 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800&auto=format&fit=crop&q=80',
     'salmon': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&auto=format&fit=crop&q=80',
     'steak': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80',
@@ -99,6 +104,7 @@ class _CookScreenState extends State<CookScreen> {
         return entry.value;
       }
     }
+    if (clean.contains('kebab') || clean.contains('tikka') || clean.contains('skewer')) return _culinaryMap['chicken kebab']!;
     if (clean.contains('paneer')) return _culinaryMap['paneer tikka']!;
     if (clean.contains('chicken')) return _culinaryMap['butter chicken']!;
     if (clean.contains('biryani') || clean.contains('rice')) return _culinaryMap['biryani']!;
@@ -164,13 +170,14 @@ Return ONLY a single valid JSON object without markdown code blocks:
       ],
       'generationConfig': {
         'responseMimeType': 'application/json',
+        'temperature': 0.2,
+        'maxOutputTokens': 650,
       }
     });
 
     final endpoints = [
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=$_geminiApiKey',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=$_geminiApiKey',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=$_geminiApiKey',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$_geminiApiKey',
     ];
 
     List<Recipe> dishes = [];
@@ -181,7 +188,7 @@ Return ONLY a single valid JSON object without markdown code blocks:
           Uri.parse(url),
           headers: {'Content-Type': 'application/json'},
           body: requestBody,
-        );
+        ).timeout(const Duration(milliseconds: 3500));
 
         if (response.statusCode != 200) {
           continue;

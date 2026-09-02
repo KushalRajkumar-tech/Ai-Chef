@@ -41,45 +41,55 @@ class _HomeScreenState extends State<HomeScreen> {
   String _getImageForDish(String dishName, {String category = '', List<String> ingredients = const []}) {
     final text = ('$dishName $category ${ingredients.join(' ')}').toLowerCase();
     
-    // Indian & Tandoori Specialties
-    if (text.contains('paneer') || text.contains('tikka') || text.contains('cottage cheese')) {
-      return 'https://images.unsplash.com/photo-1567184109191-37764e7fadd9?w=800&auto=format&fit=crop&q=80';
+    // Exact Kebabs & Grilled Meats
+    if (text.contains('chicken kebab') || text.contains('kebab') || text.contains('seekh') || text.contains('skewer') || text.contains('boti') || text.contains('tandoori chicken')) {
+      return 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80';
     }
+    // Paneer & Vegetarian Tandoori
+    if (text.contains('paneer tikka') || text.contains('kadai paneer') || text.contains('paneer') || text.contains('cottage cheese')) {
+      return 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=80';
+    }
+    // Curries & Butter Chicken
     if (text.contains('butter chicken') || text.contains('makhani') || text.contains('tikka masala') || text.contains('chicken curry') || text.contains('korma')) {
       return 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800&auto=format&fit=crop&q=80';
     }
+    // Biryani & Rice
     if (text.contains('biryani') || text.contains('pulao') || text.contains('fried rice') || text.contains('basmati')) {
       return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80';
     }
-    if (text.contains('tandoori') || text.contains('kebab') || text.contains('seekh') || text.contains('roast chicken') || text.contains('grilled chicken')) {
-      return 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=800&auto=format&fit=crop&q=80';
-    }
-    if (text.contains('dal') || text.contains('lentil') || text.contains('chana') || text.contains('curry') || text.contains('sambar')) {
+    // Dals & Lentils
+    if (text.contains('dal') || text.contains('lentil') || text.contains('chana') || text.contains('chole') || text.contains('rajma') || text.contains('sambar')) {
       return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80';
     }
-    if (text.contains('halwa') || text.contains('gajar') || text.contains('carrot halwa') || text.contains('gulab jamun') || text.contains('kheer')) {
-      return 'https://images.unsplash.com/photo-1579372786545-d24232daf58c?w=800&auto=format&fit=crop&q=80';
+    // South Indian
+    if (text.contains('dosa') || text.contains('masala dosa')) {
+      return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=800&auto=format&fit=crop&q=80';
     }
-
+    if (text.contains('idli') || text.contains('vada')) {
+      return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=800&auto=format&fit=crop&q=80';
+    }
+    // Desserts & Sweets
+    if (text.contains('halwa') || text.contains('gajar') || text.contains('carrot halwa')) {
+      return 'assets/images/gajar_ka_halwa.jpg';
+    }
+    if (text.contains('lava cake') || text.contains('chocolate cake') || text.contains('brownie') || text.contains('cake') || text.contains('dessert')) {
+      return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&auto=format&fit=crop&q=80';
+    }
     // Pastas & Italian
     if (text.contains('pasta') || text.contains('tagliatelle') || text.contains('spaghetti') || text.contains('carbonara') || text.contains('fettuccine') || text.contains('penne') || text.contains('lasagna') || text.contains('alfredo') || text.contains('macaroni')) {
-      return 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&auto=format&fit=crop&q=80';
+      return 'truffle_pasta.jpg';
     }
     if (text.contains('pizza') || text.contains('flatbread') || text.contains('focaccia') || text.contains('calzone')) {
       return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80';
     }
-    if (text.contains('risotto') || text.contains('mushroom') || text.contains('truffle')) {
-      return 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?w=800&auto=format&fit=crop&q=80';
-    }
-
     // Seafood & Meats
-    if (text.contains('salmon') || text.contains('fish') || text.contains('trout') || text.contains('cod') || text.contains('tuna') || text.contains('halibut')) {
-      return 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&auto=format&fit=crop&q=80';
+    if (text.contains('salmon') || text.contains('fish') || text.contains('trout') || text.contains('cod') || text.contains('tuna')) {
+      return 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&auto=format&fit=crop&q=80';
     }
-    if (text.contains('prawn') || text.contains('shrimp') || text.contains('lobster') || text.contains('crab') || text.contains('calamari')) {
+    if (text.contains('prawn') || text.contains('shrimp') || text.contains('lobster') || text.contains('crab')) {
       return 'https://images.unsplash.com/photo-1559742811-822873691df8?w=800&auto=format&fit=crop&q=80';
     }
-    if (text.contains('steak') || text.contains('beef') || text.contains('ribeye') || text.contains('tenderloin') || text.contains('lamb') || text.contains('mutton')) {
+    if (text.contains('steak') || text.contains('beef') || text.contains('ribeye') || text.contains('tenderloin') || text.contains('wagyu') || text.contains('lamb') || text.contains('mutton')) {
       return 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80';
     }
     if (text.contains('burger') || text.contains('sandwich') || text.contains('wrap') || text.contains('sub')) {
@@ -88,9 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (text.contains('taco') || text.contains('burrito') || text.contains('fajita') || text.contains('quesadilla') || text.contains('mexican')) {
       return 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&auto=format&fit=crop&q=80';
     }
-
     // Asian Noodles & Stir Fries
-    if (text.contains('noodle') || text.contains('ramen') || text.contains('pad thai') || text.contains('chow mein') || text.contains('udon') || text.contains('soba') || text.contains('stir fry')) {
+    if (text.contains('noodle') || text.contains('ramen') || text.contains('pad thai') || text.contains('chow mein') || text.contains('hakka') || text.contains('udon') || text.contains('stir fry')) {
       return 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80';
     }
     if (text.contains('soup') || text.contains('broth') || text.contains('chowder') || text.contains('stew')) {
@@ -99,19 +108,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (text.contains('salad') || text.contains('bowl') || text.contains('avocado') || text.contains('quinoa') || text.contains('caesar')) {
       return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop&q=80';
     }
+
     if (text.contains('egg') || text.contains('omelet') || text.contains('shakshuka') || text.contains('scramble') || text.contains('breakfast')) {
       return 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&auto=format&fit=crop&q=80';
     }
 
-    // Desserts & Bakery
-    if (text.contains('chocolate') || text.contains('brownie') || text.contains('fudge') || text.contains('lava cake')) {
-      return 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800&auto=format&fit=crop&q=80';
-    }
-    if (text.contains('cheesecake') || text.contains('tiramisu') || text.contains('pudding') || text.contains('pancake') || text.contains('waffle') || text.contains('dessert') || text.contains('ice cream')) {
-      return 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=800&auto=format&fit=crop&q=80';
-    }
-
-    // High Quality Gourmet Food Fallback
     return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80';
   }
 
@@ -243,13 +244,14 @@ Return ONLY a single valid JSON object without markdown formatting, code fences,
       ],
       'generationConfig': {
         'responseMimeType': 'application/json',
+        'temperature': 0.2,
+        'maxOutputTokens': 450,
       }
     });
 
     final endpoints = [
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=$_geminiApiKey',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=$_geminiApiKey',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=$_geminiApiKey',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$_geminiApiKey',
     ];
 
     Recipe? generatedRecipe;
@@ -260,7 +262,7 @@ Return ONLY a single valid JSON object without markdown formatting, code fences,
           Uri.parse(url),
           headers: {'Content-Type': 'application/json'},
           body: requestBody,
-        );
+        ).timeout(const Duration(milliseconds: 3500));
 
         if (response.statusCode != 200) {
           continue;
