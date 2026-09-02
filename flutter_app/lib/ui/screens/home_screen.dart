@@ -298,17 +298,13 @@ Return ONLY a single valid JSON object without markdown formatting, code fences,
         final dishFinalName = recipeMap['name'] ?? dishName;
         final dishCategory = recipeMap['category'] ?? 'Gemini AI Recipe';
 
-        final visualDesc = recipeMap['visualPrompt'] as String? ?? 'Delicious gourmet plate of $dishFinalName, appetizing restaurant plating, professional food photography';
-        final seed = (DateTime.now().millisecondsSinceEpoch) % 900000;
-        final aiImageUrl = 'https://image.pollinations.ai/prompt/${Uri.encodeComponent(visualDesc)}?width=800&height=600&nologo=true&seed=$seed';
-
         generatedRecipe = Recipe(
           id: 'ai-custom-${DateTime.now().millisecondsSinceEpoch}',
           name: dishFinalName,
           category: dishCategory,
           categoryGroup: 'favorites',
           desc: recipeMap['desc'] ?? 'A delicious recipe crafted by Gemini AI.',
-          imageUrl: aiImageUrl,
+          imageUrl: _getImageForDish(dishFinalName, category: dishCategory, ingredients: ingredients),
           rating: 5.0,
           time: recipeMap['time'] ?? '25 min',
           level: recipeMap['level'] ?? 'Easy',

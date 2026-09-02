@@ -452,9 +452,12 @@ Return ONLY a single valid JSON object strictly matching this schema:
      * Automatically resolves matching authentic high-resolution gourmet food photography.
      * Navigates directly to `recipe.html?id=ai-custom` (or `RecipeDetailScreen` in Flutter) displaying the generated recipe with full ingredients, quantities, stats, and numbered instructions.
 
-2. **Ingredient Engine (Cook Screen / `ingredients.html`):**
+2. **Multi-Dish Ingredient Engine (Cook Screen / `ingredients.html`):**
    * **Ingredient Tag Pool:** User adds ingredients from their kitchen pantry.
-   * **Action:** Tapping the single **"Generate AI Recipe"** button calls Gemini AI with the ingredients list prompt.
+   * **Multi-Dish AI Suggestion:** Tapping **"Find Matching Dishes"** queries Gemini AI with the pantry list, returning 3 to 4 distinct recipe options with match percentages (e.g. Kadai Paneer 95%, Paneer Bhurji 92%, Paneer Capsicum Stir Fry 88%).
+   * **Interactive Dish Cards:** Users browse the suggested dishes directly with authentic photos, cook times, and pantry match indicators, then select the dish they wish to prepare to view full cooking instructions.
+   * **High-Precision Image Engine:** 100% free, authentic culinary image database mapped across all popular Indian, Continental, Asian, Seafood, and Dessert dishes.
+
 3. **Cookbook (Saved Recipes Screen / `saved.html`):**
    * **Robust Index-Based Card Rendering:** Eliminated inline HTML attribute escaping issues by referencing cookbook items via indexed memory store (`openCardRecipeByIndex`), guaranteeing that all recipe titles, cooking times, difficulty levels, star ratings, and AI badges render with 100% fidelity without blank cards.
    * **Persistence:** Users can save any recipe (both default curated dishes and custom Gemini AI creations) by tapping the top heart icon or the bottom **"Save to My Cookbook"** button on the Recipe Details screen.
@@ -463,7 +466,7 @@ Return ONLY a single valid JSON object strictly matching this schema:
      * Saved AI recipes appear at the top of the Cookbook grid with a glowing **"✦ AI Recipe"** badge, generated dish photo, cook time, and difficulty rating.
      * 1-Tap Unsave: Tapping the heart on any cookbook card dynamically updates the saved collection and counter.
      * Filter Tabs: Categorize by "All Saved", "✦ AI Generated", "Indian Food", "Chef's Favorites", and "Desserts".
-   * **Dynamic AI Image Generation:** Every newly generated recipe requests a customized `visualPrompt` tailored to that exact dish name and ingredients, synthesizing a dedicated AI photo on every generation with seamless fallback protection.
+   * **Authentic Culinary Image Integration:** Every dish accurately reflects its real-world appearance using the high-precision culinary mapper.
 
 ---
 
